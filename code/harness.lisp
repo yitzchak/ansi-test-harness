@@ -2,10 +2,13 @@
 
 (defun check-repo (&key directory repository)
   (format t "~:[Did not find~;Found~] ~A clone in ~A, assuming everything is okay.~%"
-          (probe-file directory) repository directory))
+          #+clisp (ext:probe-directory directory)
+          #-clisp (probe-file directory)
+          repository directory))
 
 (defun sync-repo (&key branch clean commit directory (git "git") repository
-                  &aux (exists (probe-file directory)))
+                  &aux (exists #+clisp (ext:probe-directory directory)
+                               #-clisp (probe-file directory)))
   (cond ((and exists (not clean))
          (format t "Fetching ~A~%" repository)
          (uiop:run-program (list git "fetch" #+(or)"--quiet")
